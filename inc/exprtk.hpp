@@ -820,7 +820,7 @@ namespace exprtk
             {
                static inline long double value()
                {
-                  const long double epsilon = (long double)(0.000000000001);
+                  const long double epsilon = 0.000000000001L;
                   return epsilon;
                }
             };
@@ -1021,7 +1021,7 @@ namespace exprtk
             template <typename T>
             inline T roundn_impl(const T v0, const T v1, real_type_tag)
             {
-               const int index = std::max<int>(0, std::min<int>(pow10_size - 1, (int)std::floor(v1)));
+               const int index = std::max<int>(0, std::min<int>(pow10_size - 1, int(std::floor(v1))));
                const T p10 = T(pow10[index]);
 
                if (v0 < T(0))
@@ -1666,17 +1666,17 @@ namespace exprtk
             if (e < fract10_size)
             {
                if (exponent > 0)
-                  return T(d * fract10[e]);
+                  return T(double(d) * fract10[e]);
                else
-                  return T(d / fract10[e]);
+                  return T(double(d) / fract10[e]);
             }
             else
-               return T(d * std::pow(10.0, 10.0 * exponent));
+               return T(double(d) * std::pow(10.0, 10.0 * exponent));
          }
          else
          {
                      d /= T(fract10[           -std::numeric_limits<T>::min_exponent10]);
-            return T(d /    fract10[-exponent + std::numeric_limits<T>::min_exponent10]);
+            return T(double(d) /    fract10[-exponent + std::numeric_limits<T>::min_exponent10]);
          }
       }
 
@@ -4634,7 +4634,7 @@ namespace exprtk
          {}
 
          vec_data_store(const std::size_t& size)
-         : control_block_(control_block::create(size,(data_t)(0),true))
+         : control_block_(control_block::create(size,data_t(0),true))
          {}
 
          vec_data_store(const std::size_t& size, data_t data, bool dstrct = false)
@@ -11426,7 +11426,7 @@ namespace exprtk
          typedef std::vector<range_data_type_t>        range_list_t;
 
          generic_function_node(const std::vector<expression_ptr>& arg_list,
-                               GenericFunction* func = (GenericFunction*)(0))
+                               GenericFunction* func = nullptr)
          : function_(func),
            arg_list_(arg_list)
          {}
@@ -11441,7 +11441,7 @@ namespace exprtk
             expr_as_vec1_store_.resize(arg_list_.size(),T(0)               );
             typestore_list_    .resize(arg_list_.size(),type_store_t()     );
             range_list_        .resize(arg_list_.size(),range_data_type_t());
-            branch_            .resize(arg_list_.size(),branch_t((expression_ptr)0,false));
+            branch_            .resize(arg_list_.size(),branch_t(nullptr, false));
 
             for (std::size_t i = 0; i < arg_list_.size(); ++i)
             {
@@ -17629,13 +17629,13 @@ namespace exprtk
                      case e_vecholder : delete reinterpret_cast<vector_holder_ptr>(local_data_list[i].pointer);
                                         break;
 
-                     case e_data      : delete (T*)(local_data_list[i].pointer);
+                     case e_data      : delete reinterpret_cast<T*>(local_data_list[i].pointer);
                                         break;
 
-                     case e_vecdata   : delete [] (T*)(local_data_list[i].pointer);
+                     case e_vecdata   : delete [] reinterpret_cast<T*>(local_data_list[i].pointer);
                                         break;
 
-                     case e_string    : delete (std::string*)(local_data_list[i].pointer);
+                     case e_string    : delete reinterpret_cast<std::string*>(local_data_list[i].pointer);
                                         break;
 
                      default          : break;
@@ -18422,11 +18422,11 @@ namespace exprtk
          {
             switch (se.type)
             {
-               case scope_element::e_variable   : if (se.data    ) delete (T*) se.data;
+               case scope_element::e_variable   : if (se.data    ) delete reinterpret_cast<T*>(se.data);
                                                   if (se.var_node) delete se.var_node;
                                                   break;
 
-               case scope_element::e_vector     : if (se.data    ) delete[] (T*) se.data;
+               case scope_element::e_vector     : if (se.data    ) delete[] reinterpret_cast<T*>(se.data);
                                                   if (se.vec_node) delete se.vec_node;
                                                   break;
 
@@ -18434,7 +18434,7 @@ namespace exprtk
                                                   break;
 
                #ifndef exprtk_disable_string_capabilities
-               case scope_element::e_string     : if (se.data    ) delete (std::string*) se.data;
+               case scope_element::e_string     : if (se.data    ) delete reinterpret_cast<std::string*>(se.data);
                                                   if (se.str_node) delete se.str_node;
                                                   break;
                #endif
@@ -21865,7 +21865,7 @@ namespace exprtk
                      nse.type      = scope_element::e_variable;
                      nse.depth     = state_.scope_depth;
                      nse.data      = new T(T(0));
-                     nse.var_node  = node_allocator_.allocate<variable_node_t>(*(T*)(nse.data));
+                     nse.var_node  = node_allocator_.allocate<variable_node_t>(*reinterpret_cast<T*>(nse.data));
 
                      if (!sem_.add_element(nse))
                      {
@@ -24006,7 +24006,7 @@ namespace exprtk
             nse.depth     = state_.scope_depth;
             nse.size      = vec_size;
             nse.data      = new T[vec_size];
-            nse.vec_node  = new typename scope_element::vector_holder_t((T*)(nse.data),nse.size);
+            nse.vec_node  = new typename scope_element::vector_holder_t(reinterpret_cast<T*>(nse.data),nse.size);
 
             if (!sem_.add_element(nse))
             {
@@ -24093,7 +24093,7 @@ namespace exprtk
             nse.type      = scope_element::e_string;
             nse.depth     = state_.scope_depth;
             nse.data      = new std::string;
-            nse.str_node  = new stringvar_node_t(*(std::string*)(nse.data));
+            nse.str_node  = new stringvar_node_t(*reinterpret_cast<std::string*>(nse.data));
 
             if (!sem_.add_element(nse))
             {
@@ -24288,7 +24288,7 @@ namespace exprtk
             nse.type      = scope_element::e_variable;
             nse.depth     = state_.scope_depth;
             nse.data      = new T(T(0));
-            nse.var_node  = node_allocator_.allocate<variable_node_t>(*(T*)(nse.data));
+            nse.var_node  = node_allocator_.allocate<variable_node_t>(*reinterpret_cast<T*>(nse.data));
 
             if (!sem_.add_element(nse))
             {
@@ -24382,7 +24382,7 @@ namespace exprtk
             nse.depth     = state_.scope_depth;
             nse.ip_index  = sem_.next_ip_index();
             nse.data      = new T(T(0));
-            nse.var_node  = node_allocator_.allocate<variable_node_t>(*(T*)(nse.data));
+            nse.var_node  = node_allocator_.allocate<variable_node_t>(*reinterpret_cast<T*>(nse.data));
 
             if (!sem_.add_element(nse))
             {
