@@ -1316,8 +1316,8 @@ namespace exprtk
             template <typename T> inline T  frac_impl(const T v, real_type_tag) { return (v - static_cast<long long>(v)); }
             template <typename T> inline T trunc_impl(const T v, real_type_tag) { return T(static_cast<long long>(v));    }
 
-            template <typename T> inline T const_pi_impl(real_type_tag) { return numeric::constant::pi; }
-            template <typename T> inline T const_e_impl (real_type_tag) { return numeric::constant::e;  }
+            template <typename T> inline T const_pi_impl(real_type_tag) { return T(numeric::constant::pi); }
+            template <typename T> inline T const_e_impl (real_type_tag) { return T(numeric::constant::e);  }
 
             template <typename T> inline T   abs_impl(const T v, int_type_tag) { return ((v >= T(0)) ? v : -v); }
             template <typename T> inline T   exp_impl(const T v, int_type_tag) { return std::exp  (v); }
