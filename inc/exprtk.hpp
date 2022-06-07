@@ -23242,7 +23242,7 @@ namespace exprtk
                        (std::string::npos == str.find("**"))
                      )
                   {
-                     const std::string curr_str = str.substr(s, e - s);
+                     std::string curr_str = str.substr(s, e - s);
 
                      if ("Z" == curr_str)
                      {
